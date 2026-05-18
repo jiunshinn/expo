@@ -10,6 +10,9 @@
 
 ### 🐛 Bug fixes
 
+- [Android] Added missing permission checks to `delete()` and `openHandle()` in the next-gen File System API. (by [@barthap](https://github.com/barthap))
+- [Android] Fixed path traversal vulnerability in `createFile`, `createDirectory`, and `rename` that allowed escaping the parent directory. (by [@barthap](https://github.com/barthap))
+
 ### 💡 Others
 
 ## 56.0.5 — 2026-05-15
