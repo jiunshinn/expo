@@ -3,6 +3,7 @@ import { renderHook } from '@testing-library/react-native';
 import AppMetrics from 'expo-app-metrics';
 
 import * as routerIntegration from '../integrations/expo-router';
+import * as reactNavigationIntegration from '../integrations/react-navigation';
 import { useObserve } from '../useObserve';
 
 jest.mock('expo-app-metrics', () => ({
@@ -19,10 +20,18 @@ jest.mock('../integrations/expo-router', () => ({
   useObserveForRouter: jest.fn(),
 }));
 
+jest.mock('../integrations/react-navigation', () => ({
+  __esModule: true,
+  useObserveForReactNavigation: jest.fn(),
+}));
+
 const mockUseObserveForRouter = routerIntegration.useObserveForRouter as jest.Mock;
+const mockUseObserveForReactNavigation =
+  reactNavigationIntegration.useObserveForReactNavigation as jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockUseObserveForReactNavigation.mockReturnValue(null);
 });
 
 describe('useObserve', () => {
@@ -35,22 +44,47 @@ describe('useObserve', () => {
     expect(result.current.markInteractive).toBe(routerScoped);
   });
 
-  it('falls back to AppMetrics.markInteractive when useObserveForRouter returns null', () => {
+  it('returns the react-navigation-scoped markInteractive when only that integration is active', () => {
     mockUseObserveForRouter.mockReturnValue(null);
+    const reactNavigationScoped = jest.fn();
+    mockUseObserveForReactNavigation.mockReturnValue(reactNavigationScoped);
+
+    const { result } = renderHook(() => useObserve());
+
+    expect(result.current.markInteractive).toBe(reactNavigationScoped);
+  });
+
+  it('prefers router over react-navigation when both happen to resolve', () => {
+    const routerScoped = jest.fn();
+    const reactNavigationScoped = jest.fn();
+    mockUseObserveForRouter.mockReturnValue(routerScoped);
+    mockUseObserveForReactNavigation.mockReturnValue(reactNavigationScoped);
+
+    const { result } = renderHook(() => useObserve());
+
+    expect(result.current.markInteractive).toBe(routerScoped);
+  });
+
+  it('falls back to AppMetrics.markInteractive when neither integration is active', () => {
+    mockUseObserveForRouter.mockReturnValue(null);
+    mockUseObserveForReactNavigation.mockReturnValue(null);
 
     const { result } = renderHook(() => useObserve());
 
     expect(result.current.markInteractive).toBe(AppMetrics.markInteractive);
   });
 
-  it('calls useObserveForRouter unconditionally on every render', () => {
+  it('calls both integration hooks unconditionally on every render', () => {
     mockUseObserveForRouter.mockReturnValue(null);
+    mockUseObserveForReactNavigation.mockReturnValue(null);
 
     const { rerender } = renderHook(() => useObserve());
     expect(mockUseObserveForRouter).toHaveBeenCalledTimes(1);
+    expect(mockUseObserveForReactNavigation).toHaveBeenCalledTimes(1);
 
     rerender(undefined);
     expect(mockUseObserveForRouter).toHaveBeenCalledTimes(2);
+    expect(mockUseObserveForReactNavigation).toHaveBeenCalledTimes(2);
   });
 
   it('returns an object with exactly one own key (markInteractive)', () => {

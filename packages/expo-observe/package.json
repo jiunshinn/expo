@@ -36,6 +36,7 @@
     "expo-eas-client": "workspace:~56.0.0"
   },
   "devDependencies": {
+    "@react-navigation/native": "^7.1.33",
     "@testing-library/react-native": "^13.3.0",
     "@types/react": "~19.2.0",
     "expo": "workspace:*",
@@ -45,10 +46,14 @@
     "expo": "*",
     "react": "*",
     "react-native": "*",
-    "expo-router": "*"
+    "expo-router": "*",
+    "@react-navigation/native": "^7.0.0"
   },
   "peerDependenciesMeta": {
     "expo-router": {
+      "optional": true
+    },
+    "@react-navigation/native": {
       "optional": true
     }
   }

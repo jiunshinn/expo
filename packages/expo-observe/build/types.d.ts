@@ -53,6 +53,12 @@ export type Config = {
      * @default false
      */
     disableRouterIntegration?: boolean;
+    /**
+     * Disables the automatic `@react-navigation/native` integration that records TTR/TTI per screen.
+     *
+     * @default false
+     */
+    disableReactNavigationIntegration?: boolean;
 };
 export interface ExpoObserveModuleType {
     dispatchEvents(): Promise<void>;
